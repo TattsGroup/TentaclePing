@@ -2,6 +2,8 @@ TentaclePing is a command line tool that helps to diagnose troubled connections 
 
 [Download](https://github.com/OctopusDeploy/TentaclePing/releases)
 
+## TentaclePing
+
 Unlike regular Ping, TentaclePing makes an SSL connection to the Tentacle service, meaning it will only work if the Tentacle service is running and responding. 
 
 The command takes two arguments:
@@ -19,6 +21,21 @@ If you are experiencing slow deployments or package uploads with Octopus, you ca
 2. Open a command prompt, and run TentaclePing as shown above
 3. Let it run for a few hours. If it encounters failures, it will log them and count the number of failures
 4. Send the results to the Octopus Deploy team
+
+## TentaclePong
+
+Normally, TentaclePing is pointed at a listening Tentacle or Octopus Server polling endpoint. If you have run TentaclePing and determinied that you have issues with connections being dropped, the next step is to determine whether the problem is with the Tentacle/Octopus server, or just a network issue. TentaclePong is the server equivalent for TentaclePing, listening on a port and waiting for requests from TentaclePing. 
+
+Usage:
+
+   TentaclePong 10945              # On server 1, listen on a port
+   TentaclePing YourServer 10945   # Server 2 will ping server 1
+
+If TentaclePing reports problems when pointed at a listening Tentacle/Octopus server, but there are no problems with TentaclePong, then the issue is most likely a bug or resource utilization problem on the Tentacle/Octopus server (e.g., high CPU usage, limited memory, etc.). 
+
+However, if the connection problems persist with TentaclePong, then the problem is most likely down to a network issue. Unfortunately there's really not much the Octopus team can do to help with that. 
+
+## Capturing output
 
 If you don't plan to watch TentaclePing run, you may want to pipe the results to a text file:
 
