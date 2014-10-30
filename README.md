@@ -28,8 +28,8 @@ Normally, TentaclePing is pointed at a listening Tentacle or Octopus Server poll
 
 Usage:
 
-   TentaclePong 10945              # On server 1, listen on a port
-   TentaclePing YourServer 10945   # Server 2 will ping server 1
+    TentaclePong 10945              # On server 1, listen on a port
+    TentaclePing YourServer 10945   # Server 2 will ping server 1
 
 If TentaclePing reports problems when pointed at a listening Tentacle/Octopus server, but there are no problems with TentaclePong, then the issue is most likely a bug or resource utilization problem on the Tentacle/Octopus server (e.g., high CPU usage, limited memory, etc.). 
 
