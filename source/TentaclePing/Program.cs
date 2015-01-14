@@ -11,22 +11,33 @@ namespace TentaclePing
 {
     static class Program
     {
-        private static readonly TimeSpan sendReceiveTimeout = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan sendReceiveTimeout = TimeSpan.FromMinutes(30);
+        private static int chunkSizeInBytes;
 
         static int Main(string[] args)
         {
-            if (args.Length >= 1 && args.Length <= 2)
+            if (args.Length >= 1 && args.Length <= 4)
             {
                 var hostname = args[0];
                 var port = 10933;
-                if (args.Length == 2)
+                if (args.Length >= 2)
                 {
                     port = int.Parse(args[1]);
                 }
+                var dataSize = 0;
+                if (args.Length >= 3)
+                {
+                    dataSize = int.Parse(args[2]);
+                }
+                var chunkSize = 2;
+                if (args.Length == 4)
+                {
+                    chunkSize = int.Parse(args[3]);
+                }
 
-                Console.WriteLine("Pinging " + hostname + " on port " + port);
-
-                return ExecutePing(hostname, port);
+                Console.WriteLine("Pinging " + hostname + " on port " + port + (dataSize == 0 ? "" : ", sending " + dataSize + "Mb of data in " + chunkSize + "Mb chunks"));
+                chunkSizeInBytes = 1024*1024*chunkSize;
+                return ExecutePing(hostname, port, dataSize);
             }
             PrintUsage();
             return 1;
@@ -34,14 +45,13 @@ namespace TentaclePing
 
         private static void PrintUsage()
         {
-            Console.WriteLine("TentaclePing.exe <your-tentacle-hostname> [<port>]");
+            Console.WriteLine("TentaclePing.exe <your-tentacle-hostname> [<port>] [<datasize>] [<chunksize>]");
         }
 
-        private static int ExecutePing(string hostname, int port)
+        private static int ExecutePing(string hostname, int port, int dataSize)
         {
             var failCount = 0;
             var successCount = 0;
-
             while (true)
             {
                 var attempts = successCount + failCount;
@@ -67,8 +77,23 @@ namespace TentaclePing
                     Console.Write("Connect: ");
                     Console.ResetColor();
 
-                    int bytesRead;
-                    SendRequest(hostname, port, out bytesRead, out connected, out sslEstablished);
+                    var bytesRead = 0;
+                    
+                    if (dataSize > 0)
+                    {
+                        var dataToBeSent = 1024*1024*dataSize;
+                        
+                        while (dataToBeSent > 0)
+                        {
+                            var data = new string('A', (dataToBeSent < chunkSizeInBytes ? dataToBeSent : chunkSizeInBytes));
+                            SendRequest(hostname, port, out bytesRead, out connected, out sslEstablished, data);
+                            dataToBeSent -= data.Length;
+                        }
+                    }
+                    else
+                    {
+                        SendRequest(hostname, port, out bytesRead, out connected, out sslEstablished);
+                    }
 
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("Success! {0:n0}ms, {1:n0} bytes read", start.ElapsedMilliseconds, bytesRead);
@@ -88,7 +113,7 @@ namespace TentaclePing
             }
         }
 
-        private static void SendRequest(string hostname, int port, out int bytesRead, out bool connected, out bool sslEstablished)
+        private static void SendRequest(string hostname, int port, out int bytesRead, out bool connected, out bool sslEstablished, string data = null)
         {
             using (var client = new TcpClient())
             {
@@ -109,6 +134,7 @@ namespace TentaclePing
                         var writer = new StreamWriter(ssl);
                         writer.WriteLine("GET / HTTP/1.1");
                         writer.WriteLine("Host: " + hostname);
+                        writer.WriteLine(data);
                         writer.WriteLine();
                         writer.Flush();
                         using (var reader = new StreamReader(ssl))

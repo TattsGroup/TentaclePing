@@ -106,10 +106,12 @@ namespace TentaclePong
                     var reader = new StreamReader(ssl);
 
                     string line;
+                    int bytesRead = 0;
                     while (!string.IsNullOrEmpty((line = reader.ReadLine())))
                     {
-
+                        bytesRead += line.Length;
                     }
+                    Console.WriteLine(bytesRead + " bytes read");
 
                     var writer = new StreamWriter(ssl);
                     writer.WriteLine("HTTP/1.0 200 OK");
