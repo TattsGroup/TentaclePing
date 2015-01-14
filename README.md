@@ -6,9 +6,9 @@ TentaclePing is a command line tool that helps to diagnose troubled connections 
 
 Unlike regular Ping, TentaclePing makes an SSL connection to the Tentacle service, meaning it will only work if the Tentacle service is running and responding. 
 
-The command takes two arguments:
+The command takes four arguments:
 
-    TentaclePing <ip/hostname> [<port>]
+    TentaclePing <ip/hostname> [<port>] [<datasize>] [<chunksize>]
     
 Examples:
 
@@ -28,8 +28,11 @@ Normally, TentaclePing is pointed at a listening Tentacle or Octopus Server poll
 
 Usage:
 
-    TentaclePong 10945              # On server 1, listen on a port
-    TentaclePing YourServer 10945   # Server 2 will ping server 1
+    TentaclePong 10945              		# On server 1, listen on a port
+    TentaclePing YourServer 10945   		# Server 2 will ping server 1
+    TentaclePing YourServer 10945 100		# Server 2 will send 100Mb of data using default chunk size (2Mb) to server 1
+    TentaclePing YourServer 10945 100 10  	# Server 2 will send 100Mb of data using a chunk size of 10Mb to server 1
+
 
 If TentaclePing reports problems when pointed at a listening Tentacle/Octopus server, but there are no problems with TentaclePong, then the issue is most likely a bug or resource utilization problem on the Tentacle/Octopus server (e.g., high CPU usage, limited memory, etc.). 
 
