@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CLAP">
+      <HintPath>..\packages\CLAP.4.6\lib\net35\CLAP.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,15 +44,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PingApp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
   -->
+  <UsingTask AssemblyFile="$(SolutionDir)packages\ILMerge.Tools.MSBuildToolTask.2.14.1208.49\tools\ILMerge.Tools.MSBuildToolTask.dll" TaskName="ILMerge.Tools.MSBuildToolTask.ILMergeTool" />
+  <Target Name="AfterBuild">
+	  <ItemGroup>
+		<ILMergeInputAssemblies Include="$(OutDir)TentaclePing.exe" />
+		<ILMergeInputAssemblies Include="$(OutDir)CLAP.dll" />
+	  </ItemGroup>
+	  <ILMergeTool InputAssemblies="@(ILMergeInputAssemblies)" OutputFile="$(OutDir)OctoPing.exe" ToolPath="$(SolutionDir)packages\ILMerge.Tools.2.14.1208\tools\ILMerge.exe" />
+	  <Delete Files="$(OutDir)TentaclePing.exe" />
+	  <Delete Files="$(OutDir)TentaclePing.pdb" />
+	  <Delete Files="$(OutDir)CLAP.dll" />
+	  <Delete Files="$(OutDir)CLAP.pdb" />
+	  <Delete Files="$(OutDir)CLAP.xml" />
+  </Target>
 </Project>
